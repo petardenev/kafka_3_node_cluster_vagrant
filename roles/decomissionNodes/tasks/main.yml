@@ -1,0 +1,112 @@
+---
+
+- name: Stoping kafka related services
+  include_role:
+    name: "serviceState"
+  vars:
+    serviceName: "{{ item }}"
+    serviceState: "stopped"
+  loop:
+    - "kafka"
+    - "awslogsd"
+
+- name: kafka Port Status
+  include_role:
+    name: portCheck
+  vars:
+    portNumber: "{{ item }}"
+    portStatus: stopped
+  loop:
+    - "{{ kafkaPort }}"
+    - "{{ kafkaJmxPort }}"
+
+- name: Removing data & log dirs related to installation
+  file:
+    path: "{{ item }}"
+    state: "absent"
+  loop:
+    - "{{ kafkaInstallDir }}/kafka"
+    - "{{ kafkaDataDir }}"
+    - "{{ kafkaLogDir }}"
+    - "{{ kafkaInstallDir }}/kafka_{{ kafkaScalaVersion }}-{{ kafkaVersion }}"
+    - "{{ kafkaInstallDir }}/kafka_{{ kafkaOldVersion }}-{{ kafkaOldScalaVersion }}"
+    - "{{ kafkaInstallDir }}/jmxMonitor"
+    - "/usr/lib/systemd/system/kafka.service"
+
+- name: remove kafka cron
+  cron:
+    name: "kafka log dir clean up cron task"
+    state: "absent"
+    user: "{{ kafkaUser }}"
+
+- name: unmount kafka ebs volume | {{ aws_kafka_ebs_device }}
+  mount:
+    path: "{{ aws_kafka_ebs_device_mount_location }}"
+    src: "{{ aws_kafka_ebs_device }}"
+    fstype: "{{ aws_kafka_ebs_device_fs }}"
+    state: "absent"
+
+---
+
+- name: Stoping zookeeper related services
+  include_role:
+    name: "serviceState"
+  vars:
+    serviceName: "{{ item }}"
+    serviceState: "stopped"
+  loop:
+    - "zookeeper"
+    - "awslogsd"
+
+- name: zookeeper Port Status
+  include_role:
+    name: portCheck
+  vars:
+    PortNumber: "{{ item }}"
+    PortStatus: "stopped"
+  loop:
+    - "{{ zookeeperClientPort }}"
+
+- name: Removing data & log dirs related to installation
+  file:
+    path: "{{ item }}"
+    state: "absent"
+  loop:
+    - "{{ zookeeperInstallDir }}/zookeeper"
+    - "{{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}"
+    - "{{ zookeeperInstallDir }}/zookeeper-{{ zookeeperOldVersion }}"
+    - "{{ zookeeperDataDir }}"
+    - "{{ zookeeperLogDir }}"
+    - "{{ zookeeperInstallDir }}/zooki.py"
+
+- name: deleting zookeeper user
+  user:
+    name: "{{ zookeeperUser }}"
+    comment: zookeeper Default User
+    uid: "{{ zookeeperUserId }}"
+    group: "{{ zookeeperGroup }}"
+    state: "absent"
+
+- name: deleting zookeeper group
+  group:
+    name: "{{  zookeeperGroup }}"
+    gid: "{{ zookeeperGroupId }}"
+    state: "absent"
+
+- name: remove zookeeper cron
+  cron:
+    name: "zookeeper metric collector"
+    state: "absent"
+    user: "{{ zookeeperUser }}"
+
+- name: remove zookeeper systemd file
+  file:
+    path: "/usr/lib/systemd/system/zookeeper.service"
+    state: "absent"
+
+- name: unmount zookeeper ebs volume | {{ aws_zookeeper_ebs_device }}
+  mount:
+    path: "{{ aws_zookeeper_ebs_device_mount_location }}"
+    src: "{{ aws_zookeeper_ebs_device }}"
+    fstype: "{{ aws_zookeeper_ebs_device_fs }}"
+    state: "absent"    

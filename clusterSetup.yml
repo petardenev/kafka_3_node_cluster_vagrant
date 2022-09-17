@@ -1,0 +1,48 @@
+---
+
+- hosts: clusterNodes
+  gather_facts: true
+  become: true
+  roles:
+    - java
+    - common
+    - install
+    - configure
+    - service
+    - crons
+
+- hosts: clusterNodes
+  gather_facts: false
+  serial: 1
+  tasks:
+    - name: Starting all zookeeper nodes
+      import_role:
+        name: serviceState
+      vars:
+        serviceName: zookeeper
+        serviceState: started
+
+    - name: zookeeper Port Status
+      include_role:
+        name: portCheckZooK
+      vars:
+        PortNumber: "{{ item }}"
+        PortStatus: started
+      loop:
+      - "{{ zookeeperClientPort }}"
+
+    - name: starting all nodes
+      import_role:
+        name: serviceState
+      vars:
+        serviceName: kafka
+        serviceState: started
+
+    - name: kafka Port Status
+      include_role:
+        name: portCheck
+      vars:
+        portNumber: "{{ item }}"
+        portStatus: started
+      loop:
+        - "{{ kafkaPort }}"

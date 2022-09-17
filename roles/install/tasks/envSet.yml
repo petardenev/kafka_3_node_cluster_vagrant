@@ -1,0 +1,23 @@
+---
+
+- name: Setting kafka Home | /etc/profile.d/kafka.sh
+  blockinfile:
+    path: /etc/profile.d/kafka.sh
+    mode: 0775
+    group: root
+    owner: root
+    create: true
+    block: |
+      export KAFKA_HOME={{ kafkaInstallDir }}/kafka
+      export PATH=$KAFKA_HOME/bin:$PATH
+
+- name: Setting zookeeper Home | /etc/profile.d/zookeeper.sh
+  ansible.builtin.blockinfile:
+    path: /etc/profile.d/zookeeper.sh
+    mode: 0775
+    group: root
+    owner: root
+    create: true
+    block: |
+      export ZOOKEEPER_HOME={{ zookeeperInstallDir }}/zookeeper
+      export PATH=$ZOOKEEPER_HOME/bin:$PATH

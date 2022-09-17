@@ -1,0 +1,34 @@
+---
+- include_tasks: jvmSettings.yml
+
+- name: Creating kafka configurations
+  include_role:
+      name: configure
+      tasks_from: dynamicConfigs.yml
+  vars:
+    - kafkaConfigFile: "{{ item }}"
+  loop:
+    - kafka-broker.properties
+    - log4j.properties
+
+- name: Creating zookeeper configurations
+  include_role:
+      name: configure
+      tasks_from: dynamicConfigsZookeeper.yml
+  vars:
+    - zookeeperConfigFile: "{{ item }}"
+  loop:
+    - java.env
+    - zoo.properties.j2
+    - log4j.properties.j2
+
+- name: Adding Zookeeper ID File | {{ zookeeperDataDir }}/myid
+  template:
+    dest: "{{ zookeeperDataDir }}/myid"
+    src: myid
+
+- name: Move log4j zookeeper to proper filename
+  command: mv {{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}/conf/log4j.properties.j2 {{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}/conf/log4j.properties
+
+- name: Move log4j zookeeper to proper filename
+  command: mv {{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}/conf/zoo.properties.j2 {{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}/conf/zoo.cfg

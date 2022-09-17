@@ -1,0 +1,24 @@
+---
+
+- hosts: clusterNodes:clusterAddNodes
+  gather_facts: true
+  become: true
+  tasks:
+    - name: mount ebs volume
+      include_role:
+        name: common
+        tasks_from: ebsDisk.yml
+
+    - name: install & configure cloudwatch logs agent
+      include_role:
+        name: cloudwatch
+
+    - name: install common utils
+      include_role:
+        name: common
+        tasks_from: commonUtils.yml
+
+    - name: install amazon linux extra package
+      package:
+        name: "amazon-linux-extras"
+        state: latest

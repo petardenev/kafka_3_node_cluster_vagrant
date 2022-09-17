@@ -1,0 +1,53 @@
+---
+
+- hosts: clusterNodes:clusterAddNodes
+  gather_facts: true
+  become: true
+  serial: 1
+  tasks:
+    - include_role:
+        name: configure
+        tasks_from: jvmSettings
+
+    - name: Restarting all nodes
+      import_role:
+        name: serviceState
+      vars:
+        serviceName: kafka
+        serviceState: restarted
+      when: jvmConfigStatus.changed
+
+    - name: kafka Port Status
+      include_role:
+        name: portCheck
+      vars:
+        portNumber: "{{ item }}"
+        portStatus: started
+      loop:
+        - "{{ kafkaPort }}"
+        - "{{ kafkaJmxPort }}"
+      when: jvmConfigStatus.changed
+
+    - include_role:
+        name: configure
+        tasks_from: dynamicConfigs
+      vars:
+        - zookeeperConfigFile: java.env
+
+    - name: Restarting all nodes
+      import_role:
+        name: serviceState
+      vars:
+        serviceName: zookeeper
+        serviceState: restarted
+      when: configStatus.changed
+
+    - name: zookeeper port status
+      include_role:
+        name: portCheck
+      vars:
+        PortNumber: "{{ item }}"
+        PortStatus: started
+      loop:
+        - "{{ zookeeperClientPort }}"
+      when: configStatus.changed

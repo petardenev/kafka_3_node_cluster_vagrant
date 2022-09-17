@@ -1,0 +1,39 @@
+---
+
+- hosts: clusterNodes:clusterAddNodes
+  gather_facts: true
+  become: true
+  serial: 1
+  tasks:
+    - name: including restart tasks
+      import_role:
+        name: serviceState
+      vars:
+        serviceName: kafka
+        serviceState: restarted
+
+    - name: kafka port status
+      include_role:
+        name: portCheck
+      vars:
+        portNumber: "{{ item }}"
+        portStatus: started
+      loop:
+        - "{{ kafkaPort }}"
+        - "{{ kafkaJmxPort }}"
+
+    - name: including restart tasks
+      import_role:
+        name: serviceState
+      vars:
+        serviceName: zookeeper
+        serviceState: restarted
+
+    - name: zookeeper port status
+      include_role:
+        name: portCheck
+      vars:
+        PortNumber: "{{ item }}"
+        PortStatus: started
+      loop:
+        - "{{ zookeeperClientPort }}"

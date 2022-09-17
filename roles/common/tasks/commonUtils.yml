@@ -1,0 +1,32 @@
+---
+- name: Install Common Utils
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - net-tools
+    - tar
+    - unzip
+    - wget
+    - gcc
+
+- name: install python3* packages and dependencies
+  apt:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - python3
+    - python3-pip
+    - python3-devel
+  when:
+    - ansible_distribution in ['CentOS', 'RedHat'] | list
+
+- name: install python3* packages and dependencies  | Debian
+  apt:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - python3
+    - python3-pip
+    - python3-dev
+  when: ansible_distribution in ['Debian', 'Ubuntu'] | list

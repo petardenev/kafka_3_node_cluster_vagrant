@@ -1,0 +1,58 @@
+---
+
+- name: Download Kafka using get_url
+  become: yes
+  get_url:
+    url: "{{ KafkaDownloadUrl }}"
+    dest: "{{ kafkaTarLocation }}"
+    mode: 0755
+    owner: "{{ kafkaUser }}"
+    group: "{{ kafkaGroup }}"
+
+- name: copy and unarchive kafka | {{ kafkaVersion }}
+  unarchive:
+    remote_src: yes
+    src: "{{ kafkaTarLocation }}"
+    dest: "{{ kafkaInstallDir }}"
+    owner: "{{ kafkaUser }}"
+    group: "{{ kafkaGroup }}"
+    validate_certs: false
+    keep_newer: yes
+    creates: "{{ kafkaInstallDir }}/kafka_{{ kafkaScalaVersion }}-{{ kafkaVersion }}/bin"
+
+- name: Ensuring permissions on unarchieved files
+  file:
+    path: "{{ kafkaInstallDir }}/kafka_{{ kafkaScalaVersion }}-{{ kafkaVersion }}"
+    owner: "{{ kafkaUser }}"
+    group: "{{ kafkaGroup }}"
+    recurse: true
+    mode: 0775
+
+- name: Download Zookeeper using get_url
+  become: yes
+  get_url:
+    url: "{{ zookeeperDownloadUrl }}"
+    dest: "{{ zookeeperTarLocation }}"
+    mode: 0755
+    owner: "{{ zookeeperUser }}"
+    group: "{{ zookeeperGroup }}"
+
+- name: Copying and Unarchive zookeeper tar | {{ zookeeperVersion }}
+  unarchive:
+    remote_src: yes
+    src: "{{ zookeeperTarLocation }}"
+    dest: "{{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}"
+    owner: "{{ zookeeperUser }}"
+    group: "{{ zookeeperGroup }}"
+    validate_certs: false
+    keep_newer: yes
+    extra_opts: ["--strip-components=1"]
+    creates: "{{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}/bin"
+
+- name: Ensuring permissions on unarchieved files
+  file:
+    path: "{{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}"
+    owner: "{{ zookeeperUser }}"
+    group: "{{ zookeeperGroup }}"
+    recurse: true
+    mode: 0775

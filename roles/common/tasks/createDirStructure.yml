@@ -1,0 +1,34 @@
+---
+
+- name: Creating installing dir | {{ kafkaInstallDir }}
+  file:
+    path: "{{ kafkaInstallDir }}"
+    state: directory
+
+- name: Creating kafka directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ kafkaUser }}"
+    group: "{{ kafkaGroup }}"
+    mode: 0775
+  loop:
+    - "{{ kafkaDataDir }}"
+    - "{{ kafkaLogDir }}"
+
+- name: Creating installing dir | {{ zookeeperInstallDir }}
+  ansible.builtin.file:
+    path: "{{ zookeeperInstallDir }}/zookeeper-{{ zookeeperVersion }}"
+    recurse: true
+    state: directory
+
+- name: Creating zookeeper directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ zookeeperUser }}"
+    group: "{{ zookeeperGroup }}"
+    mode: 0775
+  loop:
+    - "{{ zookeeperDataDir }}"
+    - "{{ zookeeperLogDir }}"

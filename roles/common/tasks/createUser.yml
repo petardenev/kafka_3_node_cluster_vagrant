@@ -1,0 +1,27 @@
+---
+
+- name: creating kafka group
+  group:
+    name: "{{  kafkaGroup }}"
+    gid: "{{ kafkaGroupId }}"
+    state: present
+
+- name: creating kafka user
+  user:
+    name: "{{ kafkaUser }}"
+    comment: kafka Default User
+    uid: "{{ kafkaUserId }}"
+    group: "{{ kafkaGroup }}"
+
+- name: creating zookeeper group
+  group:
+    name: "{{  zookeeperGroup }}"
+    gid: "{{ zookeeperGroupId }}"
+    state: present
+
+- name: creating zookeeper user
+  user:
+    name: "{{ zookeeperUser }}"
+    comment: zookeeper Default User
+    uid: "{{ zookeeperUserId }}"
+    group: "{{ zookeeperGroup }}"
